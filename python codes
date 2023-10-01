@@ -1,0 +1,75 @@
+import pandas as pd
+dfCus = pd.read_csv(r'C:\Users\MyLenovo\Downloads\Customer.csv', delimiter=';')
+dfTrans = pd.read_csv(r'C:\Users\MyLenovo\Downloads\Case Study - Transaction.csv', delimiter=';')
+dfStore = pd.read_csv(r'C:\Users\MyLenovo\Downloads\Case Study - Store.csv', delimiter=';')
+dfProd = pd.read_csv(r'C:\Users\MyLenovo\Downloads\Case Study - Product.csv', delimiter=';')
+print(dfCus, dfTrans, dfStore, dfProd)
+dfCus['Marital Status'].dropna(inplace = True)
+x = float("nan") 
+print(f"Ini pd.isna : {pd.isna(x)}")
+dfCus.dropna(inplace = True)
+dfTrans.dropna(inplace = True)
+dfStore.dropna(inplace = True)
+dfProd.dropna(inplace = True)
+import seaborn as sns
+import numpy as np
+import matplotlib.style as style
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
+# list data yang akan di gabung
+list_dataframe = [dfCus, dfTrans, dfStore, dfProd]
+# gabungkan data dengan metode concat dari pandas
+pd.concat(list_dataframe)
+pd.concat(list_dataframe, axis=1)
+#Regresi
+Reg = dfTrans.groupby('Date')['Qty'].agg([np.sum])
+Reg
+#Machine Learning Membuat Clustering
+dfTrans.groupby('CustomerID').agg({'Qty': ['sum'],
+                                  'TotalAmount':['sum'],
+                                  'TransactionID':['count']})
+%matplotlib inline
+import matplotlib.pyplot as plt
+import seaborn as sns; sns.set()  # for plot styling
+import numpy as np
+col_x = 'Qty'
+col_y = 'TotalAmount'
+# calculate the standard deviation and the mean
+x_mean = dfTrans[col_x].mean()
+x_stdev = dfTrans[col_x].std()
+
+y_mean = dfTrans[col_y].mean()
+y_stdev = dfTrans[col_y].std()
+
+print(x_mean, x_stdev)
+print(y_mean, y_stdev)
+# calculate the normalised values on x and y
+x_min = min(dfTrans[col_x])
+x_max = max(dfTrans[col_x])
+
+norm_x = ((dfTrans[col_x] - x_min)/(x_max - x_min))
+dfTrans['norm_x'] = norm_x
+
+y_min = min(dfTrans[col_y])
+y_max = max(dfTrans[col_y])
+
+norm_y = ((dfTrans[col_y] - y_min)/(y_max - y_min))
+dfTrans['norm_y'] = norm_y
+# create Kmeans clusters
+from sklearn.cluster import KMeans
+
+x_y = np.column_stack((dfTrans['norm_x'], dfTrans['norm_y']))
+
+km_res = KMeans(n_clusters=2).fit(x_y)
+clusters = km_res.cluster_centers_
+clusters
+import matplotlib.pyplot as plt
+from matplotlib.pyplot import figure
+figure(num=None, figsize=(10, 10), dpi=100, facecolor='w', edgecolor='k')
+
+plt.xlabel(col_x)
+plt.ylabel(col_y)
+
+plt.scatter(dfTrans.norm_x, dfTrans.norm_y, alpha = 0.25, s = 100, color='red')
+plt.title("Kmeans Scatterplot of Quantity vs Total Amount", fontsize=18)
+plt.scatter(clusters[:,0], clusters[:,1], s = 100000, alpha=0.30)
